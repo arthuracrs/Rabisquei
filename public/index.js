@@ -1,68 +1,92 @@
-var canvas = new fabric.Canvas("c");
-var text = new fabric.Textbox('Hello world From Fabric JS', {
-    width: 250,
-    cursorColor: "blue",
-    top: 10,
-    left: 10
-});
+document.addEventListener("DOMContentLoaded", () => {
+    const socket = io.connect()
 
-canvas.add(text)
+    let kk = false
 
-let historic = []
-let pointerHistoric = 0
+    document.querySelector("#kk").addEventListener('click', () => {
+        kk = !kk
+        // console.log(kk)
+    })
 
-let tempCanvas = JSON.stringify(canvas)
-historic.push(tempCanvas)
+    var canvas = new fabric.Canvas("c");
+    var text = new fabric.Textbox('Hello world From Fabric JS', {
+        width: 250,
+        cursorColor: "blue",
+        top: 10,
+        left: 10
+    });
 
-let saveCanvas = {}
+    canvas.add(text)
 
-function decreasePointerHistoric() {
-    if (pointerHistoric > 0) {
-        pointerHistoric--
-    }
+    socket.on('draw', (obj) => {
 
-}
+        if (kk) {
+            canvas.loadFromJSON(obj)
+            
+        }
+        
+    })
 
-function increasePointerHistoric() {
-    if (pointerHistoric + 1 < historic.length) {
-        pointerHistoric++
-    }
+    let historic = []
+    let pointerHistoric = 0
 
-}
-canvas.on('after:render', (options) => {
-    document.querySelector('#pointer').innerHTML = 'Pointer: ' + pointerHistoric
-    document.querySelector('#length').innerHTML = 'Length: ' + historic.length
-})
-
-canvas.on('object:modified', (options) => {
-    tempCanvas = JSON.stringify(canvas)
-    
-    if (pointerHistoric + 1 < historic.length && historic.length != 1) {
-        historic = historic.slice(0, pointerHistoric+1)
-    }
-
+    let tempCanvas = JSON.stringify(canvas)
     historic.push(tempCanvas)
-    increasePointerHistoric()
-})
 
-document.querySelector("#save").addEventListener('click', () => {
-    tempCanvas = JSON.stringify(canvas)
-})
+    let saveCanvas = {}
 
-document.querySelector("#load").addEventListener('click', () => {
-    canvas.loadFromJSON(tempCanvas)
-})
+    function decreasePointerHistoric() {
+        if (pointerHistoric > 0) {
+            pointerHistoric--
+        }
+    }
 
-document.querySelector("#undo").addEventListener('click', () => {
-    decreasePointerHistoric()
-    canvas.loadFromJSON(historic[pointerHistoric])
-})
+    function increasePointerHistoric() {
+        if (pointerHistoric + 1 < historic.length) {
+            pointerHistoric++
+        }
+    }
 
-document.querySelector("#redo").addEventListener('click', () => {
-    increasePointerHistoric()
-    canvas.loadFromJSON(historic[pointerHistoric])
-})
+    canvas.on('after:render', (options) => {
+        document.querySelector('#pointer').innerHTML = 'Pointer: ' + pointerHistoric
+        document.querySelector('#length').innerHTML = 'Length: ' + historic.length
+        if (!kk) {
+            const tempCanvasToEmit = JSON.stringify(canvas)
+            socket.emit('draw', tempCanvasToEmit)
+        }
 
-// console.log(JSON.stringify(canvas));//logs the string representation
-// console.log(canvas.toObject());//logs canvas as an object
-// console.log(canvas.toSVG());//logs the SVG representation of canvas
+    })
+
+    canvas.on('object:modified', (options) => {
+        tempCanvas = JSON.stringify(canvas)
+
+        if (pointerHistoric + 1 < historic.length && historic.length != 1) {
+            historic = historic.slice(0, pointerHistoric + 1)
+        }
+
+        historic.push(tempCanvas)
+        increasePointerHistoric()
+    })
+
+    document.querySelector("#save").addEventListener('click', () => {
+        tempCanvas = JSON.stringify(canvas)
+    })
+
+    document.querySelector("#load").addEventListener('click', () => {
+        canvas.loadFromJSON(tempCanvas)
+    })
+
+    document.querySelector("#undo").addEventListener('click', () => {
+        decreasePointerHistoric()
+        canvas.loadFromJSON(historic[pointerHistoric])
+    })
+
+    document.querySelector("#redo").addEventListener('click', () => {
+        increasePointerHistoric()
+        canvas.loadFromJSON(historic[pointerHistoric])
+    })
+
+    // console.log(JSON.stringify(canvas));//logs the string representation
+    // console.log(canvas.toObject());//logs canvas as an object
+    // console.log(canvas.toSVG());//logs the SVG representation of canvas
+})
