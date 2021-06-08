@@ -12,10 +12,10 @@ app.use(express.static(__dirname + '/public'))
 io.on('connection', (socket) => {
     console.log('a user connected');
     socket.on('draw', (obj) => {
-        io.emit('draw', obj)
+        socket.broadcast.emit('draw', obj)
     })
 });
 
-server.listen(3000, () => {
+server.listen(3030, () => {
     console.log('listening on *:3000');
 });

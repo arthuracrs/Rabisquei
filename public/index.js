@@ -20,11 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     socket.on('draw', (obj) => {
 
-        if (kk) {
+        // if (kk) {
             canvas.loadFromJSON(obj)
-            
-        }
-        
+            console.log('sdas')
+        // }
+
     })
 
     let historic = []
@@ -50,11 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.on('after:render', (options) => {
         document.querySelector('#pointer').innerHTML = 'Pointer: ' + pointerHistoric
         document.querySelector('#length').innerHTML = 'Length: ' + historic.length
-        if (!kk) {
-            const tempCanvasToEmit = JSON.stringify(canvas)
-            socket.emit('draw', tempCanvasToEmit)
-        }
-
     })
 
     canvas.on('object:modified', (options) => {
@@ -66,6 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         historic.push(tempCanvas)
         increasePointerHistoric()
+        
+        const tempCanvasToEmit = JSON.stringify(canvas)
+        socket.emit('draw', tempCanvasToEmit)
     })
 
     document.querySelector("#save").addEventListener('click', () => {
