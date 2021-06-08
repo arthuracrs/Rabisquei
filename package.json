@@ -5,7 +5,7 @@
   "repository": "https://github.com/arthuracrs/Rabisquei.git",
   "author": "arthur <arthuracrs3@gmail.com>",
   "license": "MIT",
-  "scripts":{
+  "scripts": {
     "dev": "nodemon index.js"
   },
   "devDependencies": {
